@@ -1,7 +1,16 @@
+
+form{
+	text-align	: left;
+}
+
+a{
+	font-size	: 0.8em;
+}
+
 #game{
 	display : none;
 }
 
-form{
-	text-align	: left;
+#inscr_form{
+	display	: none;
 }
