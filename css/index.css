@@ -24,3 +24,7 @@ html body{
 	margin-top	: 50px;
 }
 
+body input[type="text"]{
+	height	: 30px;
+}
+

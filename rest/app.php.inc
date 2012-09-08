@@ -5,10 +5,15 @@
  * @author Benjamin Herbomez <benjamin.herbomez@gmail.com>
  */
  
+include 'bdd.php.inc';
+
+
  define('PUT'		, 'PUT');
  define('POST'		, 'POST');
  define('DELETE'	, 'DELETE');
  define('GET'		, 'GET');
+ 
+ 
  
  function process_rest($rest){
 	 

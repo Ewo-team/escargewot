@@ -7,10 +7,7 @@
 
 
 include 'app.php.inc';
-
-function inscr($name, $mail, $password){
-	
-}
+include 'user.php.inc';
 
 function add_score($name, $password){
 	
@@ -23,7 +20,8 @@ function get_score(){
 //Inclusion de l'outil de gestion des requêtes
 
 $rest['user'] = array(
-	PUT	=> 'inscr'
+	PUT	=> 'inscr',
+	GET => 'test_log'
 );
 
 $rest['score'] = array(

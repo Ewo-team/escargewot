@@ -10,6 +10,7 @@
 			<div class="span1">&nbsp;</div>
 			<div class="span4">Nom d'utilisateur</div>
 			<div class="span4"><input type="text"  placeholder="ex : Escargewotik" id="co_name" /></div>
+			<div class="span3">Vous pouvez utiliser votre compte ewo</div>
 		</div>
 		<div class="row-fluid">
 			<div class="span1">&nbsp;</div>
