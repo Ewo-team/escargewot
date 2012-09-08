@@ -1,6 +1,8 @@
 <link rel="stylesheet"href="css/bootstrap/bootstrap.min.css" />
 <link rel="stylesheet" href="css/game.css" />
 
+<div id="error">
+</div>
 
 <form class="form-horizontal" onsubmit="return false;" id="co_form">
 	<fieldset class="fieldset">
@@ -9,22 +11,23 @@
 		<div class="row-fluid">
 			<div class="span1">&nbsp;</div>
 			<div class="span4">Nom d'utilisateur</div>
-			<div class="span4"><input type="text"  placeholder="ex : Escargewotik" id="co_name" /></div>
-			<div class="span3">Vous pouvez utiliser votre compte ewo</div>
+			<div class="span4"><input type="text"  placeholder="ex : Escargewotik" id="co_name" 
+			rel="popover" data-content="Vous pouvez utiliser votre compte ewo (ou pas)" data-original-title="Information"/></div>
+			<div class="span3"></div>
 		</div>
 		<div class="row-fluid">
 			<div class="span1">&nbsp;</div>
 			<div class="span4">Mot de passe</div>
-			<div class="span4"><input type="text"  placeholder="ex : bi&egrave;re" id="co_pwd" /></div>
+			<div class="span4"><input type="password"  placeholder="ex : bi&egrave;re" id="co_pwd" /></div>
 		</div>
-		
+		<br />
 		<div class="row-fluid">
 			<div class="span1">&nbsp;</div>
 			<div class="span4">
 				<a href="">Mot de passe oubli&eacute;</a> |
 				<a href="#" onclick="selectScreen('inscr'); return false;">Inscription</a>
 			</div>
-			<div class="span2"><button class="btn">Connexion</button></div>
+			<div class="span2"><button class="btn" id="co_btn">Connexion</button></div>
 		</div>
 		
 	</fieldset>
@@ -42,12 +45,12 @@
 		<div class="row-fluid">
 			<div class="span1">&nbsp;</div>
 			<div class="span4">Mot de passe</div>
-			<div class="span4"><input type="text"  placeholder="ex : bi&egrave;re" id="pinscr_wd" /></div>
+			<div class="span4"><input type="password"  placeholder="ex : bi&egrave;re" id="inscr_pwd" /></div>
 		</div>
 		<div class="row-fluid">
 			<div class="span1">&nbsp;</div>
 			<div class="span4">Mot de passe</div>
-			<div class="span4"><input type="text" id="inscr_pwd_conf" /></div>
+			<div class="span4"><input type="password" id="inscr_pwd_conf" /></div>
 		</div>
 		<div class="row-fluid">
 			<div class="span1">&nbsp;</div>
@@ -68,8 +71,23 @@
 	</fieldset>
 </form>
 
-<canvas id="game" width="800px" height="500"></canvas>
+<canvas id="game" width="800px" height="450px"  tabindex="1"></canvas>
+
+
+
+<div class="modal hide fade" id="modal">
+	<div class="modal-header">
+		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+	</div>
+	<div class="modal-body">
+	</div>
+		<div class="modal-footer">
+		<button class="btn" data-dismiss="modal" >Close</button>
+	</div>
+</div>
 
 <script src="js/jquery/jquery-1.8.1.min.js"></script>
+<script src="js/jquery/jcanvas.min.js"></script>
 <script src="js/bootstrap/bootstrap.min.js"></script>
 <script src="js/master.js"></script>
+<script src="js/game.js"></script>

@@ -5,11 +5,12 @@
  * @author Benjamin Herbomez <benjamin.herbomez@gmail.com>
  */
  
+
+include_once 'exception.php.inc';
  
  //Quelques constantes pour definir sur quelle base on se connecte
  define('BASE_EWO'	, 'ewo');
  define('BASE_LOCAL', 'loc');
-
 
 /**
  * Classe d'accès aux données
@@ -24,7 +25,7 @@ abstract class Dao extends PDO{
 	/**
 	 * Tester les user / mdp de quelqu'un
 	 */
-	abstract function test_log($user, $pwd);
+	abstract function test_log($name, $pwd);
 }
 
 /**
@@ -36,8 +37,19 @@ class LocalDao extends Dao{
 	}
 	
 
-	public function test_log($user, $pwd){
+	public function test_log($name, $pwd){
+		$pwd = hash('sha256', $pwd);
+		
 		$query = 'SELECT `pwd` FROM `users` WHERE `name`=:name;';
+		$stmt = $this->prepare($query);
+		$stmt->execute(array(':name' => $name));
+		
+		$result = $stmt->fetch(PDO::FETCH_OBJ);
+		
+		if(isset($result) && $result){
+			return $result->pwd == $pwd;
+		}
+		return false;
 	}
 	
 	/**
@@ -51,11 +63,15 @@ class LocalDao extends Dao{
 		VALUES (:name, :pwd, :mail)';
 		
 		$stmt = $this->prepare($query);
-		$stmt->execute(array(
+		$result = $stmt->execute(array(
 			':name' => $name,
 			':pwd'	=> $pwd	,
 			':mail'	=> $mail
 		));
+		
+		if(!$result){
+			throw new DaoException($stmt->errorInfo());
+		}
 	}
 }
 
@@ -67,7 +83,7 @@ class EwoDao extends Dao{
 		parent::__construct(BASE_EWO);
 	}
 	
-	public function test_log($user, $pwd){
+	public function test_log($name, $pwd){
 		$query = 'SELECT `passwd` FROM `utilisateurs` WHERE `nom`=:name;';
 		
 	}

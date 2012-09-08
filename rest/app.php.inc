@@ -5,6 +5,7 @@
  * @author Benjamin Herbomez <benjamin.herbomez@gmail.com>
  */
  
+include '../config.php.inc';
 include 'bdd.php.inc';
 
 

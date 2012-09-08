@@ -6,5 +6,5 @@
  */
  
  
-include 'config.php.inc';
-include $config['root'].'view/game.php.inc';
+include_once 'config.php.inc';
+include_once $config['root'].'view/game.php.inc';

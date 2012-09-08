@@ -5,6 +5,6 @@
  * @author Benjamin Herbomez <benjamin.herbomez@gmail.com>
  */
 
-include 'config.php.inc';
-include $config['root'].'view/index.php.inc';
+include_once 'config.php.inc';
+include_once $config['root'].'view/index.php.inc';
 
