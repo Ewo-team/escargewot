@@ -1,9 +1,11 @@
 jQuery(window).ready(function(){
+	pauseMusic();
 	jQuery('html').append('<div class="hide" id="'+pref+'wrapper"></div>');
 	
 	jQuery.each(ressources, function(id, value){
 		jQuery('#'+pref+'wrapper').append('<img src="'+value+'" id="'+pref+id+'"/>');
 	});
+	
 });
 
 var y_dec 	= 75;
@@ -20,36 +22,47 @@ var h_i = 75;
 var cst_dev = w_g*w_i;
 
 var pref = 'res_';
+//préchargement des images
 var ressources = {
 	'road'	: 'imgs/road.png',
 	'oil' 	: 'imgs/oil.png',
 	'perso'	: 'imgs/escargot1.png',
+	'life'	: 'imgs/life.png',
+	'water'	: 'imgs/water.png',
+	'vodka'	: 'imgs/vodka.png',
 	'life'	: 'imgs/life.png'
 };
 
+//utilisation des ressources chargées
 function _(res){
 	return jQuery('#'+pref+res)[0];
 }
 
-var milestone_up = 2000;
+var milestone_up = 1000;
 
 //vitesse de base
-var speed = 30; // px par seconde
-var score = 0;
-var life  = 3;
-var distance = 0;
+var speed ; // px par seconde
+var score ;
+var life ;
+var distance;
 
 var cases = [];
+var objs = [];
 
 var oil_prob = 20;
+var vodka_prob = 28;
+var water_prob = 40;
+var life_prob = 1000;
 
 function generate_line(index){
 	if(index == undefined){
 		cases.push([]);
+		objs.push([]);
 		index = cases.length - 1;
 	}
 	else{
 		cases[index] =  [];
+		objs[index] =  [];
 	}
 	
 	for(j = 0; j < h_g;++j){
@@ -58,16 +71,36 @@ function generate_line(index){
 			cases[index].push('oil');
 		else
 			cases[index].push('road');
+			
+		var vodka = Math.floor(Math.random()*vodka_prob);
+		var water = Math.floor(Math.random()*water_prob);
+		var life  = Math.floor(Math.random()*life_prob);
+		
+		if(life == 0){
+			objs[index].push('life');
+		}	
+		else if(vodka == 0){
+			objs[index].push('vodka');
+		}	
+		else if(water == 0){
+			objs[index].push('water');
+		}
+		else{
+			objs[index].push(null);
+		}
 	}
-	//console.log(cases);
 }
+
+var bonus_up = 10;
 
 function init(){
 	//"free_first" premières lignes libres
 	for(i = 0; i < free_first;++i){
 		cases[i] = [];
+		objs[i]  = [];
 		for(j = 0; j < h_g;++j){
 			cases[i].push('road');
+			objs[i].push(null);
 		}
 	}
 	
@@ -80,22 +113,49 @@ function init(){
 var fps = 30;
 var lastUpdate = 0;
 var mainTimeout;
+var evt_init = false;
+var bonus = 0;
+
 
 function initEvents(){
+	if(evt_init)
+		return;
+	evt_init = true;
+	var down = [false, false, false, false];
 	jQuery("#game").bind({
 		keydown: function(e) {
 			var key = e.keyCode;
+			if(key  == 40 && perso_pos < h_g - 1 && !down[0]){ //bas
+				perso_pos++;
+				down[0] = true;
+			}
+			if(key  == 38 && perso_pos > 0 && !down[1]){//haut
+				perso_pos--;
+				down[1] = true;
+			} 
+			if(key  == 37 && perso_adv > 0 && !down[2]){ //gauche
+				perso_adv--;
+				down[2] = true;
+			};
+			if(key  == 39 && perso_adv < w_g - 1 && !down[3]){ //droite
+				perso_adv++;
+				down[3] = true;
+			}
+		},
+		keyup: function(e) {
+			var key = e.keyCode;
 			if(key  == 40){ //bas
-				if(perso_pos < h_g - 1)
-					perso_pos++;
+				down[0] = false;
 			}
 			if(key  == 38){//haut
-				if(perso_pos > 0)
-					perso_pos--;
+				down[1] = false;
 			} 
-			if(key  == 39); //gauche
-			if(key  == 37); //droite
-
+			if(key  == 37){ //gauche
+				down[2] = false;
+			};
+			if(key  == 39){ //droite
+				down[3] = false;
+			}
 		},
 
 		focusin: function(e) {
@@ -106,17 +166,27 @@ function initEvents(){
 			jQuery(e.currentTarget).removeClass("selected");
 		}
 	});
-	jQuery("#game").focus();
 }
-
-var speed_up = 10;
+var max_life = 6;
+var speed_up = 1.4;
+var speed_down = 0.8;
 var speed_up_nb = 0;
 
 var fpsInv = 1/fps;
 
 function launchGame(){
+	speed = 50;
+	distance = 0;
+	life = 3;
+	perso_pos = Math.ceil(h_g / 2) - 1;
+	perso_adv = 0;
+	
+	run = true,
+	jQuery('#sound_eternal_war').get(0).play();
+	
 	init();
 	initEvents();
+	jQuery("#game").focus();
 	update();
 }
 
@@ -128,24 +198,63 @@ function update(){
 	var x_dec = distance % w_i;
 	if(x_dec < l_dec){
 		cases = cases.slice(1,cases.lenght);
+		objs = objs.slice(1,objs.lenght);
 			generate_line();
 	}
+	
+	handleColision();
+	
 	l_dec = x_dec;
 	//Draw background
 	drawBackground(x_dec);
+	//Draw objs
+	drawObjs(x_dec);
 	//Draw perso
 	drawPerso();
 	//Draw infos
 	drawInfos();
 	
-	if(distance - last_milestone > milestone_up*(1+speed_up/2)){
-		speed += speed_up;
+	if(distance - last_milestone > milestone_up*(1+speed_up_nb/2)){
+		speed *= speed_up;
+		
 		speed_up_nb++;
 		last_milestone  = distance;
 		console.log('up');
 	}
-	mainTimeout = setTimeout(update, fpsInv);
+	if(run)
+		mainTimeout = setTimeout(update, fpsInv);
 }
+
+var run = false;
+
+function handleColision(){
+	var ground = cases[perso_adv][perso_pos];
+	
+	if(ground == 'oil'){
+		life--;
+		cases[perso_adv][perso_pos] = 'road';
+	}
+	var obj = objs[perso_adv][perso_pos];
+	if(obj == 'water' && speed > 30){
+		speed *= speed_down;
+		speed_up_nb--;
+	}
+	else if(obj == 'life'){
+		if(life < max_life)
+			++life;
+		else
+			bonus += bonus_up* 3;
+	}
+	else if(obj == 'vodka'){
+		bonus += bonus_up;
+	}
+	
+	objs[perso_adv][perso_pos] = null;
+	
+	if(life <= 0)
+		end();
+}
+
 
 function drawBackground(x_dec){
 	var posX = 0;
@@ -164,14 +273,49 @@ function drawBackground(x_dec){
 	});
 }
 
+function drawObjs(x_dec){
+	var posX = 0;
+	jQuery.each(objs, function(x, line){
+		posX = x*w_i - x_dec;
+		
+		jQuery.each(line,function(y, img){
+			if(img != null)
+				jQuery('#game').drawImage({
+					source: _(img),
+					x: posX,
+					y: y_dec + y*h_i,
+					fromCenter: false
+				});
+		});
+	});
+}
+
 var perso_pos = Math.ceil(h_g / 2) - 1;
+var perso_adv = 0;
 function drawPerso(){
 	jQuery('#game').drawImage({
 		source: _('perso'),
-		x: 0,
+		x: perso_adv*w_i,
 		y: y_dec + perso_pos*h_i,
 		fromCenter: false
 	});
+}
+
+function end(){
+	run = false;
+	var score = distance*10;
+	jQuery('#score').html(Math.round(distance/100)/10+bonus);
+	stopMusic();
+	selectScreen('end');
+}
+
+function stopMusic(){
+	jQuery('#sound_eternal_war').get(0).pause();
+	jQuery('#sound_eternal_war').get(0).currentTime=0;
+}
+
+function pauseMusic(){
+	jQuery('#sound_eternal_war').get(0).pause();
 }
 
 function drawInfos(){
@@ -189,6 +333,22 @@ function drawInfos(){
 		x: 10, y: 10,
 		font: "16pt Verdana, sans-serif",
 		text: "Distance : "+(Math.round(distance/100)/10)+"m",
+		fromCenter: false
+	});
+	jQuery('#game').drawText({
+		fillStyle: "#000",
+		strokeWidth: 0,
+		x: 10, y: 40,
+		font: "16pt Verdana, sans-serif",
+		text: "Vitesse : "+(Math.round(speed/fps)/10)+"m/s",
+		fromCenter: false
+	});
+	jQuery('#game').drawText({
+		fillStyle: "#000",
+		strokeWidth: 0,
+		x: 300, y: 10,
+		font: "16pt Verdana, sans-serif",
+		text: "bonus : "+bonus,
 		fromCenter: false
 	});
 	

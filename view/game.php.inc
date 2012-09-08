@@ -71,6 +71,12 @@
 	</fieldset>
 </form>
 
+<div id="end" class="well hide">
+	<p>Vous &ecirc;tes en rade d'alcool</p>
+	<p>Votre score : <span id='score'></span></p>
+	<a href="" onclick="selectScreen('game');return false;">Recommencer</a>
+</div>
+
 <canvas id="game" width="800px" height="450px"  tabindex="1"></canvas>
 
 
@@ -85,6 +91,11 @@
 		<button class="btn" data-dismiss="modal" >Close</button>
 	</div>
 </div>
+
+<audio controls="controls" id="sound_eternal_war" class="hide" loop="true" preload="true" autoplay="false">
+  <source src="sound/eternal_war.mp3" type="audio/mp3" />
+  Your browser does not support the audio tag.
+</audio>
 
 <script src="js/jquery/jquery-1.8.1.min.js"></script>
 <script src="js/jquery/jcanvas.min.js"></script>

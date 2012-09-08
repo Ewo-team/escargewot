@@ -10,11 +10,15 @@ function selectScreen(screen){
 	jQuery('#co_form').hide();
 	jQuery('#inscr_form').hide();
 	jQuery('#game').hide();
+	jQuery('#end').hide();
 	jQuery('*[rel="popover"]').popover('hide');
 	
 	switch(screen){
 		case 'inscr': //inscription
 			jQuery('#inscr_form').show();
+			break;
+		case 'end': //fin
+			jQuery('#end').show();
 			break;
 		case 'game': //jeu
 			jQuery('#game').show();
