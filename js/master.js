@@ -71,7 +71,7 @@ var methods = [PUT, GET, POST, DELETE];
 function sendRest(url, method, callBack){
 	if(jQuery.inArray(method, methods) >= 0){
 		jQuery.ajax({
-			url 	: 'rest/?'+url,
+			url 	: 'rest/index.php?'+url,
 			type	: method,
 			cache	: false,
 			success	: function(data){
