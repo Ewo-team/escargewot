@@ -10,7 +10,7 @@ function inscr($name, $password, $mail){
 	
 	$sql = new LocalDao();
 	try{
-		$sql->addUser($name, $mail, $password);
+		$sql->addUser($name, $password, $mail);
 		$result['add'] = true;
 	}
 	catch(DaoException $exception){
