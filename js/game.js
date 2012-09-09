@@ -187,6 +187,7 @@ function launchGame(){
 	init();
 	initEvents();
 	jQuery("#game").focus();
+	add_anim_classic()
 	update();
 }
 
@@ -207,12 +208,12 @@ function update(){
 	l_dec = x_dec;
 	//Draw background
 	drawBackground(x_dec);
+	//Draw infos
+	drawInfos();
 	//Draw objs
 	drawObjs(x_dec);
 	//Draw perso
 	drawPerso();
-	//Draw infos
-	drawInfos();
 	
 	if(distance - last_milestone > milestone_up*(1+speed_up_nb/2)){
 		speed *= speed_up;
@@ -233,6 +234,7 @@ function handleColision(){
 	if(ground == 'oil'){
 		life--;
 		cases[perso_adv][perso_pos] = 'road';
+		add_anim(GLISSE, 5);
 	}
 	var obj = objs[perso_adv][perso_pos];
 	if(obj == 'water' && speed > 30){
@@ -283,7 +285,7 @@ function drawObjs(x_dec){
 				jQuery('#game').drawImage({
 					source: _(img),
 					x: posX,
-					y: y_dec + y*h_i,
+					y: y_dec + y*h_i - h_i/3 ,
 					fromCenter: false
 				});
 		});
@@ -293,20 +295,80 @@ function drawObjs(x_dec){
 var perso_pos = Math.ceil(h_g / 2) - 1;
 var perso_adv = 0;
 function drawPerso(){
+	if(anim.type == null){
+		jQuery('#game').drawImage({
+			source: _('perso'),
+			x: perso_adv*w_i,
+			y: y_dec + perso_pos*h_i - h_i/3,
+			fromCenter: false
+		});
+	}
+	else{
+		if(anim.type == GLISSE){
+			drawPersoGlisse();
+		}
+		else if(anim.type == CLASSIC){
+			drawPersoClassic();
+		}
+		if(anim.duree != 'Infinity'){
+			anim.duree -= fpsInv;
+			if(anim.duree <= 0){
+				add_anim_classic();
+			}
+		}
+	}
+}
+
+function drawPersoClassic(){
+	
+	var g_y_dec = Math.sin(distance/speed*1.5)*h_i/6;
+	
 	jQuery('#game').drawImage({
 		source: _('perso'),
 		x: perso_adv*w_i,
-		y: y_dec + perso_pos*h_i,
+		y: y_dec + perso_pos*h_i + g_y_dec - h_i/3,
 		fromCenter: false
 	});
 }
 
+function drawPersoGlisse(){
+	
+	var g_y_dec = Math.sin(anim.options.y)*h_i/4;
+	var rot = 30*Math.sin(anim.options.y*1.5)
+	
+	jQuery('#game').drawImage({
+		source: _('perso'),
+		x: perso_adv*w_i,
+		y: y_dec + perso_pos*h_i + g_y_dec - h_i/3,
+		rotate: rot,
+		fromCenter: false
+	});
+	
+	anim.options.y += fpsInv*5;
+}
+
+var anim = {
+	type  : null,
+	duree : 0,
+	options : null
+}
+
 function end(){
 	run = false;
-	var score = distance*10;
-	jQuery('#score').html(Math.round(distance/100)/10+bonus);
 	stopMusic();
-	selectScreen('end');
+	var score = Math.round(distance/100)/10+bonus;
+	
+	jQuery('#score').html(score);
+	
+
+	sendRest('scores/'+name_glob+'/'+score, PUT, function(data){
+		json = jQuery.parseJSON(data);
+		if(json.hasOwnProperty('error'))
+			showError(json.error);
+		
+		selectScreen('end');
+	});
+	
 }
 
 function stopMusic(){
@@ -362,3 +424,25 @@ function drawInfos(){
 	}
 }
 
+var CLASSIC = 1;
+var GLISSE = 0;
+
+function add_anim(type, duree){
+	if(type == GLISSE)
+		add_anim_glisse(duree);
+	else{
+		anim.type  = type;
+		anim.duree = duree;	
+	}
+}
+
+function add_anim_glisse(duree){
+	anim.type  = GLISSE;
+	anim.duree = duree;	
+	anim.options = {y:0};
+}
+
+function add_anim_classic(){
+	anim.type  = CLASSIC;
+	anim.duree ='Infinity';
+}

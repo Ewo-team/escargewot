@@ -8,14 +8,8 @@
 
 include 'app.php.inc';
 include 'user.php.inc';
+include 'score.php.inc';
 
-function add_score($name, $password){
-	
-}
-
-function get_score(){
-	
-}
 
 //Inclusion de l'outil de gestion des requêtes
 
@@ -24,7 +18,7 @@ $rest['user'] = array(
 	GET => 'test_log'
 );
 
-$rest['score'] = array(
+$rest['scores'] = array(
 	PUT	=> 'add_score',
 	GET	=> 'get_score'
 );

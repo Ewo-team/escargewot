@@ -5,14 +5,13 @@
  * @author Benjamin Herbomez <benjamin.herbomez@gmail.com>
  */
  
-function inscr($name, $mail, $password){
+function inscr($name, $password, $mail){
 	$result = array();
 	
 	$sql = new LocalDao();
 	try{
 		$sql->addUser($name, $mail, $password);
 		$result['add'] = true;
-		die('{"add":"true"}');
 	}
 	catch(DaoException $exception){
 		$result['add'] = false;

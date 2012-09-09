@@ -73,6 +73,44 @@ class LocalDao extends Dao{
 			throw new DaoException($stmt->errorInfo());
 		}
 	}
+	
+	/**
+	 * Ajouter un nouveau score
+	 */
+	public function add_score($name, $score){
+		$query = '
+		INSERT INTO `scores`
+		(`name`, `score`)
+		VALUES (:name, :score)';
+		
+		$stmt = $this->prepare($query);
+		$result = $stmt->execute(array(
+			':name' => $name,
+			':score'	=> $score
+		));
+		
+		if(!$result){
+			throw new DaoException($stmt->errorInfo());
+		}
+	}
+	
+	public function get_score($page){
+		
+		$nbPerPage = 40;
+		
+		$query = 'SELECT name, score FROM `scores` ORDER BY `score` DESC LIMIT :start, :nb';
+		$stmt = $this->prepare($query);
+		$stmt->bindValue(':start', $nbPerPage*$page, PDO::PARAM_INT);
+		$stmt->bindValue(':nb', $nbPerPage, PDO::PARAM_INT);
+		$stmt->execute();
+		
+		$result = $stmt->fetchAll(PDO::FETCH_OBJ);
+		
+		if(!$result){
+			throw new DaoException($stmt->errorInfo());
+		}
+		return $result;
+	}
 }
 
 /**
