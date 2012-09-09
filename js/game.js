@@ -38,7 +38,7 @@ function _(res){
 	return jQuery('#'+pref+res)[0];
 }
 
-var milestone_up = 1000;
+var milestone_up = 500;
 
 //vitesse de base
 var speed ; // px par seconde
@@ -168,8 +168,8 @@ function initEvents(){
 	});
 }
 var max_life = 6;
-var speed_up = 1.4;
-var speed_down = 0.8;
+var speed_up = 1.1;
+var speed_down = 0.6;
 var speed_up_nb = 0;
 
 var fpsInv = 1/fps;

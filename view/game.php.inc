@@ -128,8 +128,9 @@
 <a href="" onclick="selectScreen('scores');return false;">Voir les scores</a>
 </div>
 
-<audio controls="controls" id="sound_eternal_war" class="hide" loop="true" preload="true" autoplay="false">
-  <source src="sound/eternal_war.mp3" type="audio/mp3" />
+<audio controls="controls" id="sound_eternal_war" class="hide" loop preload preload="auto">
+  <source src="sound/eternal_war.ogg" />
+  <source src="sound/eternal_war.mp3" />
   Your browser does not support the audio tag.
 </audio>
 
