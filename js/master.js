@@ -4,8 +4,7 @@ jQuery(window).ready(function(){
 	jQuery('#co_name').popover();
 	
 	jQuery('#co_btn').click(function(){
-		//log();
-		selectScreen('game');
+		log();
 	});
 	
 });
@@ -85,7 +84,7 @@ function sendRest(url, method, callBack){
 	}
 }
 
-var name_glob = 'Test';
+var name_glob = undefined;
 var pswd_glob = undefined;
 
 function log(){

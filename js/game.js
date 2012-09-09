@@ -215,7 +215,7 @@ function update(){
 	//Draw perso
 	drawPerso();
 	
-	if(distance - last_milestone > milestone_up*(1+speed_up_nb)){
+	if(distance - last_milestone > milestone_up*(1+speed_up_nb*1.5)){
 		speed *= speed_up;
 		
 		speed_up_nb++;
