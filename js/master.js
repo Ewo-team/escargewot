@@ -3,7 +3,11 @@ jQuery(window).ready(function(){
 	jQuery('#modal').modal('hide');
 	jQuery('#co_name').popover();
 	
-	jQuery('#co_btn').click(function(){log();});
+	jQuery('#co_btn').click(function(){
+		//log();
+		selectScreen('game');
+	});
+	
 });
 
 function selectScreen(screen){
@@ -81,7 +85,7 @@ function sendRest(url, method, callBack){
 	}
 }
 
-var name_glob = undefined;
+var name_glob = 'Test';
 var pswd_glob = undefined;
 
 function log(){
@@ -157,4 +161,10 @@ function scores_prev(){
 
 function scores_next(){
 	loadScores(scores_page + 1);
+}
+
+function remove(tbl, index){
+	return jQuery.grep(tbl, function(elem, i){
+			return i != index;
+		});
 }

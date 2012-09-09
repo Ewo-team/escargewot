@@ -129,8 +129,8 @@
 </div>
 
 <audio controls="controls" id="sound_eternal_war" class="hide" loop preload preload="auto">
-  <source src="sound/eternal_war.ogg" />
   <source src="sound/eternal_war.mp3" />
+  <source src="sound/eternal_war.ogg" />
   Your browser does not support the audio tag.
 </audio>
 
