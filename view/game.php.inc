@@ -105,9 +105,6 @@
 		</thead>
 		<tbody></tbody>
 	</table>
-	<div style="text-align: center">
-		<a href="" onclick="selectScreen('co');return false;">Jouer</a>
-	</div>
 </div>
 
 <div id="about" class="well hide">
@@ -167,6 +164,7 @@
 </div>
 
 <div style="text-align: center">
+<a href="" onclick="selectScreen('co');return false;">Jouer</a> |
 <a href="" onclick="selectScreen('scores');return false;">Voir les scores</a> | 
 <a href="" onclick="selectScreen('about');return false;"><abbr title="Foire Aux Questions" class="initialism">FAQ</abbr></a> |
 <a href="" onclick="selectScreen('credit');return false;">Crédits</a>
