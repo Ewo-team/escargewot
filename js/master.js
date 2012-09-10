@@ -19,6 +19,8 @@ function selectScreen(screen){
 	jQuery('#end').hide();
 	jQuery('*[rel="popover"]').popover('hide');
 	
+	run = false;
+	
 	switch(screen){
 		case 'inscr': //inscription
 			jQuery('#inscr_form').show();
