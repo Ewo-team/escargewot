@@ -1,5 +1,6 @@
-<link rel="stylesheet"href="css/bootstrap/bootstrap.min.css" />
-<link rel="stylesheet" href="css/game.css" />
+<?php
+	echo addCss('bootstrap/bootstrap.min').addCss('game');
+?>
 
 <div id="error">
 </div>
@@ -109,6 +110,47 @@
 	</div>
 </div>
 
+<div id="about" class="well hide">
+	<h3>Foire aux questions</h3>
+	<dl>
+		<dt>01. WTF, c'est quoi ça ?</dt>
+			<dd>Simple, un jeu de course d'escargot alcoolique</dd>
+		<dt>02. Comment ça marche ?</dt>
+			<dd>Le but est de maintenir son escargot en vie le plus longtemps en vie/conscience/course</dd>
+		<dt>03. Comment je fais pour qu'il crève pas ?</dt>
+			<dd>Il faut simplement lui donner assez d'alcool, en attrapant des bouteilles</dd>
+		<dt>04. Et les bouteilles d'eau ?</dt>
+			<dd>L'eau est toxique pour ces braves bestiolles. Ca les rend sobre.</dd>
+		<dt>05. Les tâches d'huile au sol c'est quoi ?</dt>
+			<dd>Rien de sexuel, juste de l'huile de moteur. En roulant/bavant dessus vous perdez le contrôle</dd>
+		<dt>06. Mais c'est n'importe quoi !</dt>
+			<dd>Oui, on sait ...</dd>
+		<dt>07. Pas de suprise ?</dt>
+			<dd>Non, on oserait pas ]:D</dd>
+		<dt>08. On en a as encore parlé, mais les contrôles c'est quoi ?</dt>
+			<dd>Simple : les flèches clavier pour bouger, la barre d'espace pour le lance-flammes</dd>
+		<dt>09. Lance-flammes ?</dt>
+			<dd>Ouais, c'est assez fun, ça crâme tout devant soit. Par contre le carburant c'est le sang de votre escargot, alors attention à votre taux d'alcoolémie.</dd>
+	</dl>
+</div>
+
+<div id="credit" class="well hide">
+	<h3>Liste des responsables</h3>
+	<dl	>
+		<dt>Idée de base (RP)</dt>
+		<dd>les ptis gas de la <abbr title="Daemon War Elit" class="initialism">DWE</abbr></dd>
+		
+		<dt>Idée de base (Jeu d'arcade)</dt>
+		<dd>Elestel</dd>
+		
+		<dt>Images</dt>
+		<dd>Francis-</dd>
+		
+		<dt>Code</dt>
+		<dd>Elestel</dd>
+	</dl>
+</div>
+
 <canvas id="game" width="800px" height="450px"  tabindex="1"></canvas>
 
 
@@ -125,7 +167,9 @@
 </div>
 
 <div style="text-align: center">
-<a href="" onclick="selectScreen('scores');return false;">Voir les scores</a>
+<a href="" onclick="selectScreen('scores');return false;">Voir les scores</a> | 
+<a href="" onclick="selectScreen('about');return false;"><abbr title="Foire Aux Questions" class="initialism">FAQ</abbr></a> |
+<a href="" onclick="selectScreen('credit');return false;">Crédits</a>
 </div>
 
 <audio controls="controls" id="sound_eternal_war" class="hide" loop preload preload="auto">
@@ -134,8 +178,10 @@
   Your browser does not support the audio tag.
 </audio>
 
-<script src="js/jquery/jquery-1.8.1.min.js"></script>
-<script src="js/jquery/jcanvas.min.js"></script>
-<script src="js/bootstrap/bootstrap.min.js"></script>
-<script src="js/master.js"></script>
-<script src="js/game.js"></script>
+<?php
+	echo addJs('jquery/jquery-1.8.1.min')
+		.addJs('jquery/jcanvas.min')
+		.addJs('bootstrap/bootstrap.min')
+		.addJs('master')
+		.addJs('game');
+?>

@@ -91,6 +91,8 @@ function generate_line(index){
 	}
 }
 
+var time  = 0;
+
 var alco;
 
 function init(){
@@ -115,7 +117,7 @@ var lastUpdate = 0;
 var mainTimeout;
 var evt_init = false;
 var bonus = 0;
-
+var fire = false;
 
 function initEvents(){
 	if(evt_init)
@@ -129,17 +131,22 @@ function initEvents(){
 				perso_pos++;
 				down[0] = true;
 			}
-			if(key  == 38 && perso_pos > 0 && !down[1] && !anim.type == GLISSE){//haut
+			else if(key  == 38 && perso_pos > 0 && !down[1] && !anim.type == GLISSE){//haut
 				perso_pos--;
 				down[1] = true;
 			} 
-			if(key  == 37 && perso_adv > 0 && !down[2]){ //gauche
+			else if(key  == 37 && perso_adv > 0 && !down[2]){ //gauche
 				perso_adv--;
 				down[2] = true;
-			};
-			if(key  == 39 && perso_adv < w_g - 1 && !down[3]){ //droite
+			}
+			else if(key  == 39 && perso_adv < w_g - 1 && !down[3]){ //droite
 				perso_adv++;
 				down[3] = true;
+			}
+			
+			if(key  == 32 && !fire){ // espace
+				fire = true;
+				fire_time = 0;
 			}
 		},
 		keyup: function(e) {
@@ -155,6 +162,9 @@ function initEvents(){
 			};
 			if(key  == 39){ //droite
 				down[3] = false;
+			}
+			if(key  == 32){ // espace
+				fire = false;
 			}
 		},
 
@@ -179,8 +189,9 @@ function launchGame(){
 	alco = 20;
 	perso_pos = Math.ceil(h_g / 2) - 1;
 	perso_adv = 0;
-	
+	time = 0;
 	run = true;
+	fire = false;
 	jQuery('#sound_eternal_war').get(0).play();
 	
 	init();
@@ -195,12 +206,15 @@ var last_milestone = 0;
 var l_dec = 0;
 function update(){
 	distance += speed/fps;
+	time += 150*fpsInv;
 	var x_dec = distance % w_i;
 	if(x_dec < l_dec){
 		cases = cases.slice(1,cases.lenght);
 		objs = objs.slice(1,objs.lenght);
 			generate_line();
 	}
+	
+	
 	
 	handleColision();
 	l_dec = x_dec;
@@ -210,10 +224,10 @@ function update(){
 	drawInfos();
 	//Draw objs
 	drawObjs(x_dec);
-	//Draw particles
-	drawParticles();
 	//Draw perso
 	drawPerso();
+	//Draw particles
+	drawParticles();
 	
 	if(distance - last_milestone > milestone_up*(1+speed_up_nb*1.5)){
 		speed *= speed_up;
@@ -232,7 +246,7 @@ function handleColision(){
 	
 	if(ground == 'oil'){
 		cases[perso_adv][perso_pos] = 'road';
-		add_anim(GLISSE, 5);
+		add_anim(GLISSE, 2);
 	}
 	var obj = objs[perso_adv][perso_pos];
 	if(obj == 'water' && speed > 30){
@@ -278,15 +292,33 @@ function drawObjs(x_dec){
 		posX = x*w_i - x_dec;
 		
 		jQuery.each(line,function(y, img){
-			if(img != null)
+			if(img != null){
 				jQuery('#game').drawImage({
 					source: _(img),
 					x: posX,
 					y: y_dec + y*h_i - h_i/3 ,
 					fromCenter: false
 				});
+			}
 		});
 	});
+}
+
+var fire_time = 0;
+
+function launch_fire(pos, x_dec){
+	if(fire_time++ == 0){
+		alco--;
+	}
+	for(i_fire = 0; i_fire < 5; ++i_fire)
+		addFire(3.5*(Math.random()+0.5), 0.2*(Math.random()-0.5), 1+Math.random()*1.3, pos.x+w_i-20, pos.y + 10, -0.2-Math.random()/2,
+			-0.1-Math.random()/2,(Math.random()-0.5)*360, (Math.random()-0.5)/2,1, DEAD_TEDDY_OBJ);
+	
+	if(fire_time > fps/2){
+		addSmoke(3.5*(Math.random()+0.5), 0.2*(Math.random()-0.5), 1+Math.random()*1.3, pos.x+w_i-20, pos.y + 8, -0.2-Math.random()/2,
+			-0.1-Math.random()/2,(Math.random()-0.5)*360, (Math.random()-0.5)/2,1);
+		fire_time = 0;
+	}
 }
 
 function drawParticles(){
@@ -302,12 +334,32 @@ function drawParticles(){
 		particle.rot 	+= particle.v_rot*fpsInv*100;
 		particle.life 	-= fpsInv;
 		
+		if(particle.dead != DEAD_NOT){
+			var case_part_x = Math.round((particle.x-l_dec)/w_i);
+			var case_part_y = Math.floor((particle.y-g_y_dec)/h_i);
+			
+			if((particle.dead == DEAD_ALL || particle.dead == DEAD_OTHER ||
+			   particle.dead == DEAD_OBJ || particle.dead == DEAD_TEDDY_OBJ) &&
+				case_part_x >=0 && case_part_x < objs.length &&
+				
+				(objs[case_part_x][case_part_y] != null ||
+				cases[case_part_x][case_part_y] != 'road')){
+					objs[case_part_x][case_part_y] = null;
+					cases[case_part_x][case_part_y] = 'road';
+			
+					particules = remove(particules,index);
+			}
+		}
+		
+		
+		
 		jQuery('#game').drawImage({
 			source		: _(particle.type),
 			x			: particle.x,
 			y			: particle.y,
 			rotate		: particle.rot,
 			opacity		: 1- (particle.life_b - particle.life)/particle.life_b,
+			scale		: particle.scale,
 			fromCenter	: false
 		});
 	});
@@ -334,27 +386,39 @@ function drawPerso(){
 		rotate: pos.rot,
 		fromCenter: false
 	});
+	if(fire == true){
+		launch_fire(pos);
+	}
+	
 	fire_t ++;
 	fire_t %= 3;
 	if(fire_t == 2)
-		addFire(-0.75*Math.random(), -0.2*(Math.random()+0.2), 1+Math.random()/0.8, pos.x, pos.y + h_i/2, Math.random()/2, Math.random()/2,(Math.random()-0.5)*360, (Math.random()-0.5));
+		addFire(-0.75*Math.random(), -0.2*(Math.random()+0.2), 1+Math.random()/0.8, pos.x-10, pos.y + h_i/3, Math.random()/2, Math.random()/2,(Math.random()-0.5)*360, (Math.random()-0.5),1);
+	if(fire_t == 1){
+		addFire(-0.2*Math.random(), -0.3*(Math.random()+0.2), 1+Math.random()/5, pos.x+w_i-20, pos.y + 8, Math.random()/2, Math.random()/2,(Math.random()-0.5)*360, (Math.random()-0.5)/2,0.3);
+		addSmoke(-0.2*Math.random(), -0.3*(Math.random()+0.2), 1+Math.random()/0.8, pos.x+w_i-20, pos.y + 8, Math.random()/2, Math.random()/2,(Math.random()-0.5)*360, (Math.random()-0.5)/2,0.3);
+	}
 	//add smoke
-	for(p_index = 0;p_index < 2;++p_index )
-		addSmoke(-1.5*Math.random(), -0.4*(Math.random()+0.2), 1+Math.random()*1.5, pos.x, pos.y + h_i/2, Math.random()/2, Math.random()/2,(Math.random()-0.5)*360, (Math.random()-0.5));
+	//for(p_index = 0;p_index < 2;++p_index )
+		addSmoke(-1.5*Math.random(), -0.4*(Math.random()+0.2), 1+Math.random()*1.5, pos.x-10, pos.y + h_i/3, Math.random()/2, Math.random()/2,(Math.random()-0.5)*360, (Math.random()-0.5),1);
+		//lance flame
 	
 		
 	if(anim.duree != 'Infinity'){
+		
 		anim.duree -= fpsInv;
 		if(anim.duree <= 0){
-			add_anim_classic();
+			g_y_dec = 0;
+			console.log('ok')
+				add_anim_classic();
 		}
 	}
 	
 }
-
+var g_y_dec = 0;
 function drawPersoClassic(){
 	
-	var g_y_dec = Math.sin(distance/speed*1.5)*h_i/6;
+	 g_y_dec = Math.sin(time/speed*1.5)*h_i/6;
 	return {
 		x:perso_adv*w_i,
 		y:y_dec + perso_pos*h_i + g_y_dec - h_i/3,
@@ -363,7 +427,7 @@ function drawPersoClassic(){
 
 function drawPersoGlisse(){
 	
-	var g_y_dec = Math.sin(anim.options.y)*h_i/4;
+	g_y_dec = Math.sin(anim.options.y)*h_i/4;
 	var rot = 30*Math.sin(anim.options.y/1.5)
 	
 	anim.options.y += fpsInv*5;
@@ -474,7 +538,17 @@ var SMOKE = 'smoke';
 var FIRE = 'fire';
 
 
-function addSmoke(v_x, v_y, life, x_orig, y_orig, v_x_p, v_y_p, rot, v_rot){
+var DEAD_NOT		= 0;
+var DEAD_PLAYER 	= 1;
+var DEAD_OTHER 		= 2;
+var DEAD_TEDDY 		= 3;
+var DEAD_TEDDY_OBJ 	= 4;
+var DEAD_OBJ 		= 5;
+var DEAD_ALL 		= 6;
+
+function addSmoke(v_x, v_y, life, x_orig, y_orig, v_x_p, v_y_p, rot, v_rot, scale, dead){
+	if(dead == undefined)
+		dead = DEAD_NOT;
 	particules.push({
 		type 	: SMOKE,
 		life 	: life,
@@ -486,11 +560,15 @@ function addSmoke(v_x, v_y, life, x_orig, y_orig, v_x_p, v_y_p, rot, v_rot){
 		v_y_p  	: v_y_p,
 		x    	: x_orig,
 		y    	: y_orig,
-		rot		: rot
+		rot		: rot,
+		scale	: scale,
+		dead	: dead
 	});
 }
 
-function addFire(v_x, v_y, life, x_orig, y_orig, v_x_p, v_y_p, rot, v_rot){
+function addFire(v_x, v_y, life, x_orig, y_orig, v_x_p, v_y_p, rot, v_rot, scale, dead){
+	if(dead == undefined)
+		dead = DEAD_NOT;
 	particules.push({
 		type 	: FIRE,
 		life 	: life,
@@ -502,6 +580,8 @@ function addFire(v_x, v_y, life, x_orig, y_orig, v_x_p, v_y_p, rot, v_rot){
 		v_y_p  	: v_y_p,
 		x    	: x_orig,
 		y    	: y_orig,
-		rot		: rot
+		rot		: rot,
+		scale	: scale,
+		dead	: dead
 	});
 }

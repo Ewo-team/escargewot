@@ -14,6 +14,8 @@ function selectScreen(screen){
 	jQuery('#inscr_form').hide();
 	jQuery('#game').hide();
 	jQuery('#scores').hide();
+	jQuery('#about').hide();
+	jQuery('#credit').hide();
 	jQuery('#end').hide();
 	jQuery('*[rel="popover"]').popover('hide');
 	
@@ -23,6 +25,12 @@ function selectScreen(screen){
 			break;
 		case 'end': //fin
 			jQuery('#end').show();
+			break;
+		case 'about'://About
+			jQuery('#about').show();
+			break;
+		case 'credit'://credit
+			jQuery('#credit').show();
 			break;
 		case 'game': //jeu
 			jQuery('#game').show();
