@@ -194,6 +194,7 @@ function launchGame(){
 	lastUpdate = 0;
 	last_milestone = 0;
 	run = true;
+	particules = [];
 	jQuery('#sound_eternal_war').get(0).play();
 	
 	init();
