@@ -138,10 +138,13 @@
 		<dd>les ptis gas de la <abbr title="Daemon War Elit" class="initialism">DWE</abbr></dd>
 		
 		<dt>Idée de base (Jeu d'arcade)</dt>
-		<dd>Elestel</dd>
+		<dd>Elesteln (Benjamin Herbomez)</dd>
 		
 		<dt>Images</dt>
 		<dd>Francis-</dd>
+		
+		<dt>Musique</dt>
+		<dd>"Eternal War" de Mind Out</dd>
 		
 		<dt>Code</dt>
 		<dd>Elestel</dd>

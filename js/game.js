@@ -190,8 +190,10 @@ function launchGame(){
 	perso_pos = Math.ceil(h_g / 2) - 1;
 	perso_adv = 0;
 	time = 0;
-	run = true;
 	fire = false;
+	lastUpdate = 0;
+	last_milestone = 0;
+	run = true;
 	jQuery('#sound_eternal_war').get(0).play();
 	
 	init();
