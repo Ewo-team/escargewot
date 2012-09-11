@@ -138,7 +138,7 @@
 		<dd>les ptis gas de la <abbr title="Daemon War Elit" class="initialism">DWE</abbr></dd>
 		
 		<dt>Idée de base (Jeu d'arcade)</dt>
-		<dd>Elesteln (Benjamin Herbomez)</dd>
+		<dd>Elestel (Benjamin Herbomez)</dd>
 		
 		<dt>Images</dt>
 		<dd>Francis-</dd>
