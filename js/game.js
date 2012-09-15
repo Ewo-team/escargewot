@@ -32,6 +32,7 @@ var ressources = {
 	'road'	: 'imgs/road.png',
 	'oil' 	: 'imgs/oil.png',
 	'perso'	: 'imgs/escargot1.png',
+	'teddy'	: 'imgs/teddy.png',
 	'water'	: 'imgs/water.png',
 	'vodka'	: 'imgs/vodka.png',
 	'beer'	: 'imgs/beer.png',
@@ -142,20 +143,20 @@ function initEvents(){
 					down[4] = true;
 			}
 			
-			if(key  == 40 && perso_pos < h_g - 1 && !down[0] && !anim.type == GLISSE){ //bas
-				perso_pos++;
+			if(key  == 40 && perso_pos_objectif < h_g - 1 && !down[0] && !anim.type == GLISSE){ //bas
+				perso_pos_objectif++;
 				down[0] = true;
 			}
-			else if(key  == 38 && perso_pos > 0 && !down[1] && !anim.type == GLISSE){//haut
-				perso_pos--;
+			else if(key  == 38 && perso_pos_objectif > 0 && !down[1] && !anim.type == GLISSE){//haut
+				perso_pos_objectif--;
 				down[1] = true;
 			} 
-			else if(key  == 37 && perso_adv > 0 && !down[2]){ //gauche
-				perso_adv--;
+			else if(key  == 37 && perso_adv_objectif > 0 && !down[2]){ //gauche
+				perso_adv_objectif--;
 				down[2] = true;
 			}
-			else if(key  == 39 && perso_adv < w_g - 1 && !down[3]){ //droite
-				perso_adv++;
+			else if(key  == 39 && perso_adv_objectif < w_g - 1 && !down[3]){ //droite
+				perso_adv_objectif++;
 				down[3] = true;
 			}
 			
@@ -205,8 +206,9 @@ function launchGame(){
 	speed_up_nb = 0;
 	distance = 0;
 	alco = 20;
-	perso_pos = Math.ceil(h_g / 2) - 1;
-	perso_adv = 0;
+	perso_pos_objectif = Math.ceil(h_g / 2) - 1;
+	perso_pos = perso_pos_objectif*w_i;
+	perso_adv_objectif = 0;
 	time = 0;
 	bonus = 0;
 	fire = false;
@@ -214,6 +216,7 @@ function launchGame(){
 	last_milestone = 0;
 	run = true;
 	particules = [];
+	teddy_pv = -1;
 	jQuery('#sound_eternal_war').get(0).play();
 	
 	init();
@@ -239,7 +242,7 @@ function update(){
 	}
 	
 	
-	
+	popTeddy();
 	handleColision();
 	l_dec = x_dec;
 	//Draw background
@@ -248,6 +251,8 @@ function update(){
 	drawInfos();
 	//Draw objs
 	drawObjs(x_dec);
+	//Draw Teddy
+	drawTeddy();
 	//Draw perso
 	drawPerso();
 	//Draw particles
@@ -260,13 +265,15 @@ function update(){
 var run = false;
 
 function handleColision(){
-	var ground = cases[perso_adv][perso_pos];
+	var index_x = Math.round(perso_adv/w_i);
+	var index_y = Math.round(perso_pos/h_i);
+	var ground = cases[index_x][index_y];
 	
 	if(ground == 'oil'){
-		cases[perso_adv][perso_pos] = 'road';
+		cases[index_x][index_y] = 'road';
 		add_anim(GLISSE, 2);
 	}
-	var obj = objs[perso_adv][perso_pos];
+	var obj = objs[index_x][index_y];
 	if(obj == 'water' && speed > 30){
 		alco -= 2;
 	}
@@ -280,7 +287,7 @@ function handleColision(){
 			alco = max_alco;
 	}
 	
-	objs[perso_adv][perso_pos] = null;
+	objs[index_x][index_y] = null;
 	
 	if(alco <= 0)
 		end();
@@ -383,12 +390,108 @@ function drawParticles(){
 	});
 }
 
-var perso_pos = Math.ceil(h_g / 2) - 1;
-var perso_adv = 0;
+
 
 var fire_t = 0;
+var teddy_mv_proba = fps*2;;
+
+function drawTeddy(){
+	if(teddy_pv <= 0)
+		return;
+	if(teddy_x > teddy_x_objectif){
+		teddy_x -= 4*w_i*fpsInv;
+		if(teddy_x < teddy_x_objectif)
+			teddy_x = teddy_x_objectif;
+	}
+	
+	if(teddy_x < teddy_x_objectif){
+		teddy_x += 4*w_i*fpsInv;
+		if(teddy_x > teddy_x_objectif){
+			teddy_x = teddy_x_objectif;
+			teddy_pv = -1;
+		}
+	}
+
+	if(teddy_y > teddy_y_objectif){
+		teddy_y -= 4*w_i*fpsInv;
+		if(teddy_y < teddy_y_objectif)
+			teddy_y = teddy_y_objectif;
+	}
+	
+	if(teddy_y < teddy_y_objectif){
+		teddy_y += 4*w_i*fpsInv;
+		if(teddy_y > teddy_y_objectif){
+			teddy_y = teddy_y_objectif;
+		}
+	}
+	
+	var mv_proba = Math.ceil(Math.random() * teddy_mv_proba);
+	if(mv_proba == teddy_mv_proba){
+		
+		var y = Math.round(teddy_y/h_g);
+		if(y == 0)
+			teddy_y_objectif += h_i;
+		else if(y == (h_g-1)*h_i)
+			teddy_y_objectif -= h_i;
+		else{
+			var mv_dir = Math.round(Math.random());
+			if(mv_dir == 0)
+				teddy_y_objectif -= h_i;
+			else 
+				teddy_y_objectif += h_i;
+		}
+	}
+		
+	g_y_dec = -1*Math.sin(time/speed*1.5)*h_i/6;
+	var px = teddy_x - 120,
+		py = y_dec + teddy_y + g_y_dec - h_i/3;
+	jQuery('#game').drawImage({
+		source: _('teddy'),
+		x: px,
+		y: py,
+		fromCenter: false
+	});
+
+	if(fire_t == 1)
+		addFire(-0.75*Math.random(), -0.2*(Math.random()+0.2), 1+Math.random()/0.8, px, py + 33, Math.random()/2, Math.random()/2,(Math.random()-0.5)*360, (Math.random()-0.5),1);
+	addSmoke(-1.5*Math.random(), -0.4*(Math.random()+0.2), 1+Math.random()*1.5, px, py + 33, Math.random()/2, Math.random()/2,(Math.random()-0.5)*360, (Math.random()-0.5),1);
+
+}
+
+var perso_pos = Math.ceil(h_g / 2) - 1;
+var perso_pos_objectif = perso_pos;
+var perso_adv = 0;
+var perso_adv_objectif = 0;
 
 function drawPerso(){
+
+	if(perso_adv > perso_adv_objectif*w_i){
+		perso_adv -= 4*w_i*fpsInv;
+		if(perso_adv < perso_adv_objectif*w_i)
+			perso_adv = perso_adv_objectif*w_i;
+	}
+	
+	if(perso_adv < perso_adv_objectif*w_i){
+		perso_adv += 4*w_i*fpsInv;
+		if(perso_adv > teddy_x_objectif*w_i){
+			perso_adv = perso_adv_objectif*w_i;
+		}
+	}
+
+	if(perso_pos > perso_pos_objectif*h_i){
+		perso_pos -= 4*w_i*fpsInv;
+		if(perso_pos < perso_pos_objectif*h_i)
+			perso_pos = perso_pos_objectif*h_i;
+	}
+	
+	if(perso_pos < perso_pos_objectif*h_i){
+		perso_pos += 4*w_i*fpsInv;
+		if(perso_pos > perso_pos_objectif*h_i){
+			perso_pos = perso_pos_objectif*h_i;
+		}
+	}
+
+	
 	var pos;
 	if(anim.type == GLISSE){
 		pos = drawPersoGlisse();
@@ -426,8 +529,7 @@ function drawPerso(){
 		anim.duree -= fpsInv;
 		if(anim.duree <= 0){
 			g_y_dec = 0;
-			console.log('ok')
-				add_anim_classic();
+			add_anim_classic();
 		}
 	}
 	
@@ -438,8 +540,8 @@ function drawPersoClassic(){
 	 g_y_dec = Math.sin(time/speed*1.5)*h_i/6;
 
 	return {
-		x:perso_adv*w_i,
-		y:y_dec + perso_pos*h_i + g_y_dec - h_i/3,
+		x:perso_adv,
+		y:y_dec + perso_pos + g_y_dec - h_i/3,
 		rot : 0};
 }
 
@@ -451,8 +553,8 @@ function drawPersoGlisse(){
 	anim.options.y += fpsInv*5;
 	
 	return {
-		x:perso_adv*w_i,
-		y:y_dec + perso_pos*h_i + g_y_dec - h_i/3,
+		x:perso_adv,
+		y:y_dec + perso_pos + g_y_dec - h_i/3,
 		rot : rot};	
 }
 
@@ -480,10 +582,25 @@ function end(){
 	
 }
 
-var teddy = {
-	pv : 100,
-	y  : 0
-};
+var teddy_pv 			= 0;
+var teddy_y_objectif 	= 0;
+var teddy_y 			= 0;
+var teddy_x     		= 0;
+var teddy_x_objectif	= 0;
+
+//var teddy_proba 		= 1000;
+var teddy_proba 		= 1;
+
+function popTeddy(){
+	if(teddy_pv >= 0)
+		return;
+	var proba = Math.ceil(teddy_proba * Math.random());
+	if(proba == teddy_proba){
+		teddy_pv 	= 10;
+		teddy_x 	= w_i*(w_g+2);
+		teddy_x_objectif = w_i*w_g;
+	}
+}
 
 function stopMusic(){
 	jQuery('#sound_eternal_war').get(0).pause();
