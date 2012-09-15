@@ -1,3 +1,7 @@
+var game = {};
+
+(function () {
+
 jQuery(window).ready(function(){
 	pauseMusic();
 	jQuery('html').append('<div class="hide" id="'+pref+'wrapper"></div>');
@@ -8,6 +12,7 @@ jQuery(window).ready(function(){
 	
 });
 
+	
 var y_dec 	= 75;
 var w_g 	= 8;
 var h_g 	= 5;
@@ -51,8 +56,8 @@ var objs = [];
 
 var oil_prob = 20;
 var vodka_prob = 2000;
-var water_prob = 20;
-var beer_prob = 250;
+var water_prob = 15;
+var beer_prob = 500;
 
 function generate_line(index){
 	if(index == undefined){
@@ -126,7 +131,17 @@ function initEvents(){
 	var down = [false, false, false, false];
 	jQuery("#game").bind({
 		keydown: function(e) {
+			
 			var key = e.keyCode;
+
+			if(key == 27 && !down[4]){ // echap
+				if(run)
+					pause();
+				else
+					play();
+					down[4] = true;
+			}
+			
 			if(key  == 40 && perso_pos < h_g - 1 && !down[0] && !anim.type == GLISSE){ //bas
 				perso_pos++;
 				down[0] = true;
@@ -166,6 +181,9 @@ function initEvents(){
 			if(key  == 32){ // espace
 				fire = false;
 			}
+			if(key == 27){ // escape
+				down[4] = false;
+			}
 		},
 
 		focusin: function(e) {
@@ -183,13 +201,14 @@ var speed_up_nb = 0;
 var fpsInv = 1/fps;
 
 function launchGame(){
-	speed = 125;
+	speed = 600;
 	speed_up_nb = 0;
 	distance = 0;
 	alco = 20;
 	perso_pos = Math.ceil(h_g / 2) - 1;
 	perso_adv = 0;
 	time = 0;
+	bonus = 0;
 	fire = false;
 	lastUpdate = 0;
 	last_milestone = 0;
@@ -208,8 +227,10 @@ var last_milestone = 0;
 
 var l_dec = 0;
 function update(){
+	if(!run)
+		return;
 	distance += speed/fps;
-	time += 150*fpsInv;
+	time += 750*fpsInv;
 	var x_dec = distance % w_i;
 	if(x_dec < l_dec){
 		cases = cases.slice(1,cases.lenght);
@@ -232,12 +253,6 @@ function update(){
 	//Draw particles
 	drawParticles();
 	
-	if(distance - last_milestone > milestone_up*(1+speed_up_nb*1.5)){
-		speed *= speed_up;
-		
-		speed_up_nb++;
-		last_milestone  = distance;
-	}
 	if(run)
 		mainTimeout = setTimeout(update, fpsInv);
 }
@@ -270,7 +285,7 @@ function handleColision(){
 	if(alco <= 0)
 		end();
 }
-
+var bonus = 0;
 
 function drawBackground(x_dec){
 	var posX = 0;
@@ -381,7 +396,6 @@ function drawPerso(){
 	else if(anim.type == CLASSIC){
 		pos = drawPersoClassic();
 	}
-	
 	jQuery('#game').drawImage({
 		source: _('perso'),
 		x: pos.x,
@@ -422,6 +436,7 @@ var g_y_dec = 0;
 function drawPersoClassic(){
 	
 	 g_y_dec = Math.sin(time/speed*1.5)*h_i/6;
+
 	return {
 		x:perso_adv*w_i,
 		y:y_dec + perso_pos*h_i + g_y_dec - h_i/3,
@@ -438,9 +453,7 @@ function drawPersoGlisse(){
 	return {
 		x:perso_adv*w_i,
 		y:y_dec + perso_pos*h_i + g_y_dec - h_i/3,
-		rot : rot};
-	
-	
+		rot : rot};	
 }
 
 var anim = {
@@ -452,7 +465,7 @@ var anim = {
 function end(){
 	run = false;
 	stopMusic();
-	var score = Math.round(distance/100)*10+alco;
+	var score = Math.round(distance/10) + bonus;
 	
 	jQuery('#score').html(score);
 	
@@ -467,6 +480,11 @@ function end(){
 	
 }
 
+var teddy = {
+	pv : 100,
+	y  : 0
+};
+
 function stopMusic(){
 	jQuery('#sound_eternal_war').get(0).pause();
 	jQuery('#sound_eternal_war').get(0).currentTime=0;
@@ -474,6 +492,10 @@ function stopMusic(){
 
 function pauseMusic(){
 	jQuery('#sound_eternal_war').get(0).pause();
+}
+
+function playMusic(){
+	jQuery('#sound_eternal_war').get(0).play();
 }
 
 function drawInfos(){
@@ -588,3 +610,45 @@ function addFire(v_x, v_y, life, x_orig, y_orig, v_x_p, v_y_p, rot, v_rot, scale
 		dead	: dead
 	});
 }
+
+function play(){
+	playMusic();
+	run = true;
+	update();
+}
+
+function pause(){
+	run = false;
+	pauseMusic();
+	jQuery('#game').drawRect({
+		fillStyle: "#000",
+		x: 0, y: 0,
+		opacity : 0.55,
+		width: w_i*w_g,
+		height: h_i*h_g+y_dec,
+		fromCenter: false
+	})
+	.drawText({
+		fillStyle: '#fff',
+		strokeWidth: 0,
+		x: 300, y: h_i*h_g/2-22.5 + y_dec,
+		font: '45pt Helvetica Neue, Helvetica, Arial, sans-serif',
+		text: 'Pause',
+		fromCenter: false
+	});
+}
+
+//Attachement des API
+game.launchGame = launchGame;
+game.stop = function (){
+	run = false;
+	stopMusic();
+};
+
+game.pause = pause;
+
+game.play = play;
+
+})();
+
+

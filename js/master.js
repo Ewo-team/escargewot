@@ -30,7 +30,7 @@ function selectScreen(screen){
 	jQuery('#end').hide();
 	jQuery('*[rel="popover"]').popover('hide');
 	
-	run = false;
+	game.stop();
 	
 	switch(screen){
 		case 'inscr': //inscription
@@ -47,7 +47,7 @@ function selectScreen(screen){
 			break;
 		case 'game': //jeu
 			jQuery('#game').show();
-			launchGame();
+			game.launchGame();
 			break;
 		case 'scores':
 			jQuery('#scores').show();
