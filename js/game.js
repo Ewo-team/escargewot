@@ -346,6 +346,8 @@ function launch_fire(pos, x_dec){
 	}
 }
 
+var perso_d = 0;
+
 function drawParticles(){
 	particules_tmp = particules;
 	jQuery.each(particules, function(index, particle){
@@ -360,11 +362,29 @@ function drawParticles(){
 		particle.life 	-= fpsInv;
 		
 		if(particle.dead != DEAD_NOT){
+			
 			var case_part_x = Math.round((particle.x-l_dec)/w_i);
 			var case_part_y = Math.floor((particle.y-g_y_dec)/h_i);
+
+			
+			var tx = Math.round(perso_adv/w_i);
+			var ty = Math.round((perso_pos-g_y_dec)/h_i);
+			
+			if((particle.dead == DEAD_ALL || particle.dead == DEAD_PLAYER || particle.dead == DEAD_OBJ_PLAYER) &&
+				case_part_x == tx && case_part_y == ty && teddy_pv > 0){
+				if(time > perso_d){
+					--alco;
+					if(alco <= 0)
+						end();
+					perso_d = time + 500;
+				}
+				particules = remove(particules,index);
+				return;
+			}
+
 			
 			if((particle.dead == DEAD_ALL || particle.dead == DEAD_OTHER ||
-			   particle.dead == DEAD_OBJ || particle.dead == DEAD_TEDDY_OBJ) &&
+			   particle.dead == DEAD_OBJ || particle.dead == DEAD_TEDDY_OBJ ||  particle.dead == DEAD_OBJ_PLAYER) &&
 				case_part_x >=0 && case_part_x < objs.length &&
 				
 				(objs[case_part_x][case_part_y] != null ||
@@ -373,6 +393,24 @@ function drawParticles(){
 					cases[case_part_x][case_part_y] = 'road';
 			
 					particules = remove(particules,index);
+					return;
+			}
+			tx = Math.floor(teddy_x/w_i);
+			ty = Math.floor(teddy_y/h_i);
+			
+				
+			if((particle.dead == DEAD_ALL || particle.dead == DEAD_OTHER ||
+				particle.dead == DEAD_TEDDY || particle.dead == DEAD_TEDDY_OBJ) &&
+				case_part_x == tx && case_part_y == ty && teddy_pv > 0){
+
+
+				--teddy_pv;
+				if(teddy_pv == 0){
+					bonus += 5000;
+					teddy_x_objectif = w_i*(w_g+2);
+				}
+				particules = remove(particules,index);
+				return;
 			}
 		}
 		
@@ -396,7 +434,7 @@ var fire_t = 0;
 var teddy_mv_proba = fps*2;;
 
 function drawTeddy(){
-	if(teddy_pv <= 0)
+	if(teddy_pv < 0)
 		return;
 	if(teddy_x > teddy_x_objectif){
 		teddy_x -= 4*w_i*fpsInv;
@@ -455,6 +493,7 @@ function drawTeddy(){
 	if(fire_t == 1)
 		addFire(-0.75*Math.random(), -0.2*(Math.random()+0.2), 1+Math.random()/0.8, px, py + 33, Math.random()/2, Math.random()/2,(Math.random()-0.5)*360, (Math.random()-0.5),1);
 	addSmoke(-1.5*Math.random(), -0.4*(Math.random()+0.2), 1+Math.random()*1.5, px, py + 33, Math.random()/2, Math.random()/2,(Math.random()-0.5)*360, (Math.random()-0.5),1);
+	teddyLaunchFire(px, py + 33);
 
 }
 
@@ -473,7 +512,7 @@ function drawPerso(){
 	
 	if(perso_adv < perso_adv_objectif*w_i){
 		perso_adv += 4*w_i*fpsInv;
-		if(perso_adv > teddy_x_objectif*w_i){
+		if(perso_adv > perso_adv_objectif*w_i){
 			perso_adv = perso_adv_objectif*w_i;
 		}
 	}
@@ -558,6 +597,18 @@ function drawPersoGlisse(){
 		rot : rot};	
 }
 
+var teddy_fire = false;
+var teddy_fire_proba = fps*0.4;
+
+function teddyLaunchFire(x,y){
+	var proba = Math.round(Math.random() * teddy_fire_proba);
+	if(proba < teddy_fire_proba)
+		return;
+	for(i_fire = 0; i_fire < 5; ++i_fire)
+		addFire(-5*(Math.random()+0.5), 0.2*(Math.random()-0.5), 2+Math.random()*1.3, x, y, 0.2+Math.random()/2,
+			(Math.random()-0.5),(Math.random()-0.5)*360, (Math.random()-0.5)/2,1, DEAD_OBJ_PLAYER);
+}
+
 var anim = {
 	type  : null,
 	duree : 0,
@@ -588,17 +639,18 @@ var teddy_y 			= 0;
 var teddy_x     		= 0;
 var teddy_x_objectif	= 0;
 
-//var teddy_proba 		= 1000;
-var teddy_proba 		= 1;
+var teddy_proba 		= 2000;
+//var teddy_proba 		= 1;
 
 function popTeddy(){
 	if(teddy_pv >= 0)
 		return;
 	var proba = Math.ceil(teddy_proba * Math.random());
 	if(proba == teddy_proba){
-		teddy_pv 	= 10;
+		teddy_pv 	= 100;
 		teddy_x 	= w_i*(w_g+2);
 		teddy_x_objectif = w_i*w_g;
+		teddy_fire = false;
 	}
 }
 
@@ -687,6 +739,7 @@ var DEAD_TEDDY 		= 3;
 var DEAD_TEDDY_OBJ 	= 4;
 var DEAD_OBJ 		= 5;
 var DEAD_ALL 		= 6;
+var DEAD_OBJ_PLAYER = 7;
 
 function addSmoke(v_x, v_y, life, x_orig, y_orig, v_x_p, v_y_p, rot, v_rot, scale, dead){
 	if(dead == undefined)
